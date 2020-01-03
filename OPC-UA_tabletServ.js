@@ -1,8 +1,11 @@
-const opcua = require("node-opcua");
+const {
+    OPCUAServer,
+    DataType
+} = require("node-opcua");
 
 (async () => {
     try {
-        const server = new opcua.OPCUAServer({
+        const server = new OPCUAServer({
             port: 4337,
             resourcePath: "/UA/TabletServ",
             keepSessionAlive: true,
@@ -43,38 +46,28 @@ const opcua = require("node-opcua");
             "203", "204", "205", "206", "207", "208", "209", "210", "211", "212",
             "213", "214", "215", "216", "217", "218", "301", "302", "303", "304",
             "305", "306", "307", "308", "309", "310", "311", "312", "313", "314",
-            "315", "316", "317", "318" 
+            "315", "316", "317", "318"
         ]
 
         // Algorithm for creating nodes for each of the machines
-        var i; 
-        for (i = 0; i < machines.length; i++) {
+        for (let i = 0; i < machines.length; i++) {
 
             // Create NodeId
-            var nodePrefix = "ns=1;i=1";
-            var nodeIdent = nodePrefix.concat(machines[i]);
+            const nodePrefix = "ns=1;i=1";
+            const nodeIdent = nodePrefix.concat(machines[i]);
 
             // Create browse
-            var browsePrefix = "SS";
-            var nameToBrowse = browsePrefix.concat(machines[i], "Status");
+            const browsePrefix = "SS";
+            const nameToBrowse = browsePrefix.concat(machines[i], "Status");
 
             // Add variable logic
-            namespace.addVariable({
+            const variable = namespace.addVariable({
                 componentOf: myDevice,
                 nodeId: nodeIdent,   //"ns=1;i=1101",
                 browseName: nameToBrowse,
                 dataType: "String",
-
-                value: {
-                    get: function () {
-                        return new opcua.Variant({ dataType: opcua.DataType.String, value: defaultStat });
-                    },
-                    set: function (variant) {
-                        defaultStat = variant.value;
-                        return opcua.StatusCodes.Good;
-                    }
-                }
             });
+            variable.setValueFromSource({ dataType: DataType.String, value: defaultStat });
 
         }
 
@@ -88,3 +81,5 @@ const opcua = require("node-opcua");
         consol.log("OPC-UA Error Message: ", err);
     }
 })();
+
+
